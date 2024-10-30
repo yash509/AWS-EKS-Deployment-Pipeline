@@ -6,30 +6,41 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/yash509/AWS-EKS-Deployment-Pipeline.git'
             }
         }
+        
         stage('Terraform version') {
             steps {
                 sh 'terraform --version'
             }
         }
+        
         stage('Terraform init') {
             steps {
+                sh 'terraform init'
+            }   
+        }
+        
+        stage('Snyk IAC Vulnerability Test'){
+            steps{
                 withCredentials([string(credentialsId: 'snyk', variable: 'snyk')]) {
-                sh 'snyk auth $snyk'
-                sh 'terraform init && snyk iac test --report > iacvulnerabilitiyreport.txt || true'
-                // sh 'terraform init'
-                }   
+                    sh 'snyk auth $snyk'
+                    sh 'terraform init && snyk iac test --report > IAC-vulnerabilityreport.txt || true'
+                    sh 'snyk iac test backend.tf --report > IACBackend-filevulnerabilityreport.txt || true'
+                }
             }
         }
+        
         stage('Terraform validate') {
             steps {
                 sh 'terraform validate'
             }
         }
+        
         stage('Terraform plan'){
              steps{
                 sh 'terraform plan'
             }
         }
+        
         stage('Terraform apply/destroy'){
              steps{
                  script {
@@ -67,7 +78,7 @@ pipeline {
                 from: 'jenkins@example.com', 
                 replyTo: 'jenkins@example.com', 
                 mimeType: 'text/html', 
-                attachmentsPattern: 'iacvulnerabilitiyreport.txt') 
+                attachmentsPattern: 'IAC-vulnerabilityreport.txt, IACBackend-filevulnerabilityreport.txt') 
             } 
         } 
     }
