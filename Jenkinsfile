@@ -79,7 +79,44 @@ pipeline {
                 replyTo: 'jenkins@example.com', 
                 mimeType: 'text/html', 
                 attachmentsPattern: 'IAC-vulnerabilityreport.txt, IACBackend-filevulnerabilityreport.txt') 
+                
+                def buildDuration = currentBuild.durationString.replace(' and counting', '')
+                def changes = currentBuild.changeSets.collect { changeSet ->
+                    changeSet.items.collect { entry -> 
+                        "*${entry.author}:* ${entry.msg} (${entry.commitId})"
+                    }.join('\n')
+                }.join('\n')
+
+                def buildUser = env.BUILD_USER ?: 'N/A'
+                def buildUserEmail = env.BUILD_USER_EMAIL ?: 'N/A'
+
+                slackSend(
+                    channel: '#cloud_devsecops_engineer',
+                    color: currentBuild.currentResult == 'SUCCESS' ? 'good' : 'danger',
+                    message: """
+                    *${currentBuild.currentResult}:* Job ${env.JOB_NAME} (${env.BUILD_NUMBER})
+                    *Duration:* ${buildDuration}
+                    *Started by:* ${currentBuild.getBuildCauses()[0].shortDescription}
+                    *User Email:* ${env.BUILD_USER_EMAIL}
+                    *Changes:*
+                    ${changes}
+                    *Workspace:* ${env.WORKSPACE}
+                    *Node:* ${env.NODE_NAME}
+                    *Jenkins URL:* ${env.JENKINS_URL}
+                    *Executor Number:* ${env.EXECUTOR_NUMBER}
+                    *Job URL:* ${env.JOB_URL}
+                    *Build URL:* ${env.BUILD_URL}
+                    *Build Timestamp:* ${new Date(currentBuild.startTimeInMillis).format("yyyy-MM-dd HH:mm:ss")}
+                    *Build Parameters:* ${params}
+                    *Build ID:* ${env.BUILD_ID}
+                    *Build Tag:* ${env.BUILD_TAG}
+                    *Build Display Name:* ${currentBuild.displayName}
+                    *Build Executor:* ${env.EXECUTOR_NUMBER}
+                    *Slave/Node Name:* ${env.NODE_NAME}
+                    *Node Labels:* ${env.NODE_LABELS}
+                    """
+                )
             } 
-        } 
+        }
     }
 }
