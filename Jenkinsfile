@@ -29,6 +29,15 @@ pipeline {
             }
         }
 
+        stage('TFSec Scan') {
+            steps {
+                script {
+                    sh 'tfsec . || true'
+					sh 'tfsec --format json . | tee tfsec-scan.json | jq . || true'
+                }
+            }
+        }
+
         stage('Terraform validate') {
             steps {
                 sh 'terraform validate'
