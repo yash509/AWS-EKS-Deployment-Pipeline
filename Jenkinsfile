@@ -88,7 +88,7 @@ pipeline {
                     from: 'jenkins@example.com',
                     replyTo: 'jenkins@example.com',
                     mimeType: 'text/html',
-                    attachmentsPattern: 'IAC-vulnerabilityreport.txt, IACBackend-filevulnerabilityreport.txt'
+                    attachmentsPattern: 'IAC-vulnerabilityreport.txt, IACBackend-filevulnerabilityreport.txt,tfsec-scan.json'
                 )
 
                 def buildDuration = currentBuild.durationString.replace(' and counting', '')
