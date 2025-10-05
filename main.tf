@@ -89,7 +89,7 @@ resource "aws_eks_node_group" "example" {
   scaling_config {
     desired_size = 3
     max_size     = 3
-    min_size     = 2
+    min_size     = 3
   }
   instance_types = ["t2.medium"]
 
@@ -102,4 +102,5 @@ resource "aws_eks_node_group" "example" {
   ]
 
 }
+
 
